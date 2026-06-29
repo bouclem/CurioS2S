@@ -18,7 +18,7 @@ _CACHE_DIR = os.path.join("data", "wikitext2")
 def _download_wikitext2():
     """Download WikiText-2 raw via HuggingFace datasets library."""
     print("Downloading WikiText-2 via datasets library...")
-    ds = load_dataset("wikitext", "wikitext-2-raw-v1", cache_dir=_CACHE_DIR)
+    ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", cache_dir=_CACHE_DIR)
     print("Download complete.")
     return ds
 

@@ -2,7 +2,7 @@
 
 # Dataset
 dataset:
-  name: "wikitext-2-raw-v1"
+  name: "Salesforce/wikitext"
   source: "https://dax-cdn.cdn.appdomain.cloud/dax-wikitext-2/1.0.1/wikitext-2-raw-v1.zip"
   cache_dir: "data/wikitext2"
   max_train_chars: 500000

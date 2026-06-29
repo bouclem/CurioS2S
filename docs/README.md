@@ -87,7 +87,7 @@ WikiText-2 (raw) is downloaded automatically via the HuggingFace **`datasets`** 
 
 ```python
 from datasets import load_dataset
-ds = load_dataset("wikitext", "wikitext-2-raw-v1", cache_dir="data/wikitext2")
+ds = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", cache_dir="data/wikitext2")
 ```
 
 - **Splits**: `train`, `validation`, `test`
@@ -123,7 +123,7 @@ pip install -r requirements.txt
 WikiText-2 downloads automatically on first run of `train` or `compare`. To download it manually beforehand:
 
 ```bash
-python -c "from datasets import load_dataset; load_dataset('wikitext', 'wikitext-2-raw-v1', cache_dir='data/wikitext2')"
+python -c "from datasets import load_dataset; load_dataset('Salesforce/wikitext', 'wikitext-2-raw-v1', cache_dir='data/wikitext2')"
 ```
 
 This caches the dataset in `data/wikitext2/` so subsequent runs work offline.
