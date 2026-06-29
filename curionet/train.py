@@ -52,8 +52,9 @@ def train_curionet(
     epochs: int = 30,
     batch_size: int = 64,
     seq_len: int = 64,
-    dim: int = 46,
+    dim: int = 40,
     num_layers: int = 2,
+    num_heads: int = 4,
     lr: float = 3e-4,
     device: str = "cuda",
     plot_dir: str = "plots",
@@ -63,7 +64,7 @@ def train_curionet(
 ) -> dict:
     """Train CurioNet on WikiText-2 and save checkpoint for chat.
 
-    Configured for ~300K parameters (dim=46, num_layers=2).
+    Configured for ~300K parameters (dim=40, num_layers=2, num_heads=4).
     Runs on GPU (CUDA required).
     """
     if not torch.cuda.is_available() and device == "cuda":
@@ -88,6 +89,7 @@ def train_curionet(
         "tgt_vocab_size": VOCAB_SIZE,
         "dim": dim,
         "num_layers": num_layers,
+        "num_heads": num_heads,
         "dropout": 0.1,
         "padding_idx": PAD_IDX,
     }
@@ -97,6 +99,7 @@ def train_curionet(
         tgt_vocab_size=VOCAB_SIZE,
         dim=dim,
         num_layers=num_layers,
+        num_heads=num_heads,
         dropout=0.1,
         padding_idx=PAD_IDX,
         max_len=seq_len + 4,

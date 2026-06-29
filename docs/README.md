@@ -4,12 +4,14 @@ A curiosity-driven sequence-to-sequence architecture where **curiosity** — not
 
 ## Core Idea
 
-Transformers use **attention** (Q·Kᵀ → weighted V) to re-weight existing information. CurioNet uses **curiosity** to **generate new internal states** — wonder, thinking, insights.
+Transformers use **attention** (Q·Kᵀ → softmax → weighted V) to re-weight existing information. CurioNet uses **curiosity** to **generate new internal states** — wonder, mix, insights — with a **global receptive field** like Transformer, but driven by curiosity instead of attention.
 
 | | Transformer | CurioNet |
 |---|---|---|
 | **Primary mechanism** | Multi-head attention | Curiosity layers |
-| **Core operation** | Q·Kᵀ → softmax → weighted V | Wonder → Process → Insights |
+| **Core operation** | Q·Kᵀ → softmax → weighted V | Wonder → Mix → Insights |
+| **Token mixing** | Attention (softmax, competitive) | WonderMixer (sigmoid, independent) |
+| **Receptive field** | Global | Global |
 | **Self-attention** | Every layer, multi-head | Every N layers, single-head (tiny) |
 | **Cross-attention** | Multi-head, every layer | Single-head, minimal |
 | **Info sharing** | Re-weights existing info | Generates new info |
@@ -24,19 +26,34 @@ Transformers use **attention** (Q·Kᵀ → weighted V) to re-weight existing in
 ### Curiosity Layer (replaces attention layer)
 
 ```
-Input → [WonderGenerator] → wonder (new states)
+Input → [WonderGenerator] → wonder (new states, point-wise)
                   ↓
-        [WonderConv × 2] → processed wonder ("thinking")
+        [WonderMixer] → globally mixed wonder (curiosity affinity, sigmoid)
                   ↓
         [InsightExtractor] → insights ("aha!")
                   ↓
         [Gated Integration] → enriched output
 ```
 
-**NOT attention** — doesn't weight inputs.
+**NOT attention** — doesn't use Q·Kᵀ or softmax on raw embeddings.
+**NOT a CNN** — doesn't use local convolutions. Global receptive field.
 **NOT a detector** — doesn't classify patterns.
-**NOT a score** — doesn't assign values.
-**IS generative** — creates new internal states.
+**IS generative** — creates new internal states, then mixes them globally.
+
+### WonderMixer (replaces both attention and convolutions)
+
+WonderMixer is the global token mixing mechanism — the curiosity equivalent of multi-head attention:
+
+| | Multi-Head Attention | WonderMixer |
+|---|---|---|
+| **Input** | Raw token embeddings | Generated wonder states |
+| **Projections** | Q, K, V from x | Seeker, Guide from wonder |
+| **Affinity** | Q·Kᵀ → softmax (competitive) | Seeker·Guideᵀ → sigmoid (independent) |
+| **Mixing** | Weighted sum of V | Sigmoid-gated sum of x |
+| **Budget** | Competitive (softmax sums to 1) | Independent (each token decides) |
+| **Multi-head** | Yes | Yes (curiosity aspects) |
+
+Key insight: WonderMixer operates on **generated wonder states**, not raw embeddings. Each token independently decides what to take (sigmoid), rather than competing for a fixed budget (softmax).
 
 ### CurioNet Block (replaces Transformer block)
 
@@ -62,7 +79,7 @@ Net/
 ├── curionet/
 │   ├── __init__.py            # Package exports
 │   ├── model.py               # CurioNet, CurioNetEncoder, CurioNetDecoder, TinyAttention
-│   ├── curiosity.py           # CuriosityLayer, CuriosityBlock, WonderGenerator, WonderConv, InsightExtractor
+│   ├── curiosity.py           # CuriosityLayer, CuriosityBlock, WonderGenerator, WonderMixer, InsightExtractor
 │   ├── transformer.py         # TransformerSeq2Seq (for comparison)
 │   ├── tokenizer.py           # CharTokenizer (build/encode/decode/save/load)
 │   ├── data.py                # WikiText-2 download via datasets lib, WikiText2Dataset
@@ -138,6 +155,7 @@ Trains CurioNet on WikiText-2 (~300K params, GPU):
 - Saves `checkpoints/curionet_best.pt`, `curionet_latest.pt`
 - Generates `plots/curionet_wikitext2.png` (loss, PPL, params)
 - Early stopping with patience=4, warmup LR over 5 epochs
+- Skips training if checkpoint already exists (loads from disk)
 
 ### Benchmark: CurioNet vs Transformer
 
@@ -182,8 +200,9 @@ All model and training parameters are in `config.yaml`:
 
 ```yaml
 curionet:
-  dim: 46
-  num_layers: 2          # ~300K params total
+  dim: 40
+  num_layers: 2
+  num_heads: 4           # ~300K params total
 
 transformer:
   dim: 64

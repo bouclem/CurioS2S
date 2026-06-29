@@ -229,17 +229,18 @@ def compare(
     print()
 
     # --- CurioNet (~300K params) ---
-    # dim=46, num_layers=2 → ~301K params
+    # dim=40, num_layers=2, num_heads=4 → ~293K params
     curionet_config = {
-        "type": "curionet", "dim": 46, "num_layers": 2,
+        "type": "curionet", "dim": 40, "num_layers": 2, "num_heads": 4,
         "src_vocab_size": VOCAB_SIZE, "tgt_vocab_size": VOCAB_SIZE,
         "dropout": 0.1, "padding_idx": PAD_IDX,
     }
     curionet = CurioNet(
         src_vocab_size=VOCAB_SIZE,
         tgt_vocab_size=VOCAB_SIZE,
-        dim=46,
+        dim=40,
         num_layers=2,
+        num_heads=4,
         dropout=0.1,
         padding_idx=PAD_IDX,
         max_len=seq_len + 4,

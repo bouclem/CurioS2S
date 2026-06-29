@@ -50,7 +50,7 @@ class CurioNetEncoder(nn.Module):
     Architecture:
         [CuriosityBlock] × N, with TinyAttention every `attn_every` layers.
 
-    The majority of processing is curiosity (wonder→process→insight).
+    The majority of processing is curiosity (wonder→mix→insight).
     Tiny attention appears every few layers for basic info sharing.
 
     Args:
@@ -58,8 +58,7 @@ class CurioNetEncoder(nn.Module):
         dim: Hidden dimension.
         num_layers: Number of curiosity blocks.
         ff_dim: Feed-forward dimension.
-        num_wonder_convs: Conv layers per curiosity block.
-        kernel_size: Conv kernel size.
+        num_heads: Number of curiosity aspects for WonderMixer.
         dropout: Dropout rate.
         curiosity_budget: Wonder cycles per layer.
         attn_every: Insert tiny attention every N curiosity blocks.
@@ -73,8 +72,7 @@ class CurioNetEncoder(nn.Module):
         dim: int = 128,
         num_layers: int = 6,
         ff_dim: int = None,
-        num_wonder_convs: int = 2,
-        kernel_size: int = 3,
+        num_heads: int = 4,
         dropout: float = 0.1,
         curiosity_budget: int = 1,
         attn_every: int = 3,
@@ -94,7 +92,7 @@ class CurioNetEncoder(nn.Module):
         self.tiny_attns = nn.ModuleList()
         for i in range(num_layers):
             self.blocks.append(CuriosityBlock(
-                dim, ff_dim, num_wonder_convs, kernel_size, dropout, curiosity_budget
+                dim, ff_dim, num_heads, dropout, curiosity_budget
             ))
             if (i + 1) % attn_every == 0 and (i + 1) < num_layers:
                 self.tiny_attns.append(TinyAttention(dim, dropout))
@@ -102,7 +100,6 @@ class CurioNetEncoder(nn.Module):
                 self.tiny_attns.append(None)
 
     def forward(self, src: torch.Tensor) -> tuple:
-        # src: (batch, src_len)
         batch, seq_len = src.shape
         mask = src.ne(self.padding_idx)
 
@@ -113,7 +110,7 @@ class CurioNetEncoder(nn.Module):
 
         wonders = []
         for i, block in enumerate(self.blocks):
-            x, wonder = block(x)
+            x, wonder = block(x, mask=mask)
             wonders.append(wonder)
             if self.tiny_attns[i] is not None:
                 x = self.tiny_attns[i](x, mask)
@@ -135,8 +132,7 @@ class CurioNetDecoder(nn.Module):
         dim: Hidden dimension.
         num_layers: Number of curiosity blocks.
         ff_dim: Feed-forward dimension.
-        num_wonder_convs: Conv layers per curiosity block.
-        kernel_size: Conv kernel size.
+        num_heads: Number of curiosity aspects for WonderMixer.
         dropout: Dropout rate.
         curiosity_budget: Wonder cycles per layer.
         attn_every: Insert tiny self-attention every N curiosity blocks.
@@ -150,8 +146,7 @@ class CurioNetDecoder(nn.Module):
         dim: int = 128,
         num_layers: int = 6,
         ff_dim: int = None,
-        num_wonder_convs: int = 2,
-        kernel_size: int = 3,
+        num_heads: int = 4,
         dropout: float = 0.1,
         curiosity_budget: int = 1,
         attn_every: int = 3,
@@ -172,7 +167,8 @@ class CurioNetDecoder(nn.Module):
         self.cross_attns = nn.ModuleList()
         for i in range(num_layers):
             self.blocks.append(CuriosityBlock(
-                dim, ff_dim, num_wonder_convs, kernel_size, dropout, curiosity_budget
+                dim, ff_dim, num_heads, dropout, curiosity_budget,
+                causal=True,
             ))
             self.cross_attns.append(nn.MultiheadAttention(dim, num_heads=1, dropout=dropout, batch_first=True))
             if (i + 1) % attn_every == 0 and (i + 1) < num_layers:
@@ -183,8 +179,6 @@ class CurioNetDecoder(nn.Module):
         self.output_proj = nn.Linear(dim, vocab_size)
 
     def forward(self, tgt: torch.Tensor, enc_out: tuple) -> torch.Tensor:
-        # tgt: (batch, tgt_len)
-        # enc_out: (enc_hidden, enc_mask, enc_wonders)
         enc_hidden, enc_mask, _ = enc_out
 
         batch, seq_len = tgt.shape
@@ -195,11 +189,8 @@ class CurioNetDecoder(nn.Module):
         x = self.emb_norm(x)
         x = self.emb_dropout(x)
 
-        # Causal mask for self-attention (if used)
-        causal = torch.triu(torch.ones(seq_len, seq_len, device=tgt.device), diagonal=1).bool()
-
         for i, block in enumerate(self.blocks):
-            x, wonder = block(x)
+            x, wonder = block(x, mask=tgt_mask)
 
             # Cross-attention to encoder (minimal, single-head)
             ca_out, _ = self.cross_attns[i](
@@ -210,7 +201,7 @@ class CurioNetDecoder(nn.Module):
 
             # Tiny self-attention (sparse)
             if self.tiny_attns[i] is not None:
-                x = self.tiny_attns[i](x, tgt_mask & ~causal.unsqueeze(0).expand(batch, -1, -1)[:, 0])
+                x = self.tiny_attns[i](x, tgt_mask)
 
         logits = self.output_proj(x)
         return logits
@@ -221,8 +212,8 @@ class CurioNet(nn.Module):
 
     Unlike Transformers where attention is the primary mechanism,
     CurioNet uses CURIOSITY as its core. Curiosity layers generate
-    wonder states, process them through 'thinking' conv layers, and
-    extract insights — this is the main forward path.
+    wonder states, mix them globally via WonderMixer (curiosity affinity),
+    and extract insights — this is the main forward path.
 
     A tiny amount of attention is used sparingly:
     - TinyAttention every `attn_every` layers in encoder/decoder (single-head)
@@ -236,10 +227,11 @@ class CurioNet(nn.Module):
     │                 │ Transformer      │ CurioNet         │
     ├─────────────────┼──────────────────┼──────────────────┤
     │ Primary mech    │ Multi-head attn  │ Curiosity layers │
-    │ Core operation  │ Q·Kᵀ → weighted V│ Wonder→Think→Ins │
+    │ Core operation  │ Q·Kᵀ → weighted V│ Wonder→Mix→Ins   │
+    │ Token mixing    │ Attention (softmax)│ WonderMixer (sigmoid)│
     │ Self-attention  │ Every layer      │ Every N layers   │
     │ Cross-attention │ Multi-head, every│ Single-head, min │
-    │ Parameters      │ Heavy (Q,K,V,O)  │ Light (wonder)   │
+    │ Receptive field │ Global           │ Global           │
     │ Info sharing    │ Re-weights exist │ Generates new    │
     └─────────────────┴──────────────────┴──────────────────┘
 
@@ -249,8 +241,7 @@ class CurioNet(nn.Module):
         dim: Hidden dimension (default 128).
         num_layers: Curiosity blocks per encoder/decoder (default 6).
         ff_dim: Feed-forward dimension.
-        num_wonder_convs: Conv layers per curiosity block (default 2).
-        kernel_size: Conv kernel size (default 3).
+        num_heads: Number of curiosity aspects for WonderMixer (default 4).
         dropout: Dropout rate (default 0.1).
         curiosity_budget: Wonder cycles per layer (default 1).
         attn_every: Tiny attention every N layers (default 3).
@@ -265,8 +256,7 @@ class CurioNet(nn.Module):
         dim: int = 128,
         num_layers: int = 6,
         ff_dim: int = None,
-        num_wonder_convs: int = 2,
-        kernel_size: int = 3,
+        num_heads: int = 4,
         dropout: float = 0.1,
         curiosity_budget: int = 1,
         attn_every: int = 3,
@@ -276,13 +266,11 @@ class CurioNet(nn.Module):
         super().__init__()
         self.encoder = CurioNetEncoder(
             src_vocab_size, dim, num_layers, ff_dim,
-            num_wonder_convs, kernel_size, dropout,
-            curiosity_budget, attn_every, max_len, padding_idx,
+            num_heads, dropout, curiosity_budget, attn_every, max_len, padding_idx,
         )
         self.decoder = CurioNetDecoder(
             tgt_vocab_size, dim, num_layers, ff_dim,
-            num_wonder_convs, kernel_size, dropout,
-            curiosity_budget, attn_every, max_len, padding_idx,
+            num_heads, dropout, curiosity_budget, attn_every, max_len, padding_idx,
         )
 
     def forward(self, src: torch.Tensor, tgt: torch.Tensor) -> torch.Tensor:
@@ -306,7 +294,6 @@ class CurioNet(nn.Module):
             logits = self.decoder(tgt, enc_out)
             top2 = logits[:, -1, :].topk(2, dim=-1)
             next_token = top2.indices[:, 0]
-            # Don't allow eos until min_len is reached — use second-best token
             if step < min_len:
                 eos_mask = next_token == eos_idx
                 next_token = torch.where(eos_mask, top2.indices[:, 1], next_token)

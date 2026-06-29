@@ -16,10 +16,9 @@ tokenizer:
 
 # Model — CurioNet (~300K params)
 curionet:
-  dim: 46
+  dim: 40
   num_layers: 2
-  num_wonder_convs: 2
-  kernel_size: 3
+  num_heads: 4
   dropout: 0.1
   curiosity_budget: 1
   attn_every: 3

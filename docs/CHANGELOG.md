@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.2.0 — WonderMixer Architecture (Global Curiosity)
+
+### Changed
+- Replaced `WonderConv` (local convolutions) with **`WonderMixer`** (global curiosity-driven token mixing)
+- CurioNet now has a **global receptive field** like Transformer — no more local-only convolutions
+- CurioNet param budget adjusted: `dim=40, num_heads=4` → ~293K params (was dim=46 with convs)
+- `config.yaml` updated: removed `num_wonder_convs` and `kernel_size`, added `num_heads`
+- `compare.py` now **skips training if checkpoints exist** — loads from disk and goes straight to evaluation
+- `chat.py` `load_model` reads `num_heads` from checkpoint config
+- Architecture SVG diagram updated to show WonderMixer instead of WonderConv
+
+### Architecture: WonderMixer vs Attention
+- **Input**: Operates on generated wonder states (not raw embeddings like attention)
+- **Affinity**: Uses sigmoid (independent gating) instead of softmax (competitive budget)
+- **Mixing**: Each token independently decides what to take — no fixed attention budget
+- **Multi-head**: Yes — multiple "curiosity aspects" (like multi-head attention)
+- **Causal masking**: Supported for decoder (left-only, prevents seeing future tokens)
+
+### Added
+- `WonderMixer` class in `curiosity.py` — global token mixing via curiosity affinity
+- `min_len` parameter in `generate()` — prevents premature eos prediction during autoregressive generation
+- Checkpoint loading in `compare.py` — `_load_checkpoint()` function
+
+### Removed
+- `WonderConv` class (replaced by `WonderMixer`)
+- `num_wonder_convs` and `kernel_size` parameters from all model configs
+- Causal conv padding workaround (no longer needed — WonderMixer handles causality natively)
+
+---
+
 ## v1.1.0 — WikiText-2 Benchmark
 
 ### Changed

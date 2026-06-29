@@ -30,6 +30,7 @@ def load_model(checkpoint_path: str = CHECKPOINT_PATH, device: str = "cpu") -> C
         tgt_vocab_size=config["tgt_vocab_size"],
         dim=config["dim"],
         num_layers=config["num_layers"],
+        num_heads=config.get("num_heads", 4),
         dropout=config["dropout"],
         padding_idx=config["padding_idx"],
     ).to(device)
