@@ -6,9 +6,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from .model import ConvS2S
+from .model import CurioS2S
 from .data import (
-    SyntheticSeqDataset,
+    CurioDataset,
     get_dataloader,
     make_vocab,
     VOCAB_SIZE,
@@ -17,12 +17,13 @@ from .data import (
     EOS_IDX,
     encode,
     decode,
+    SAMPLES,
 )
 
 
 def train_model(
-    epochs: int = 20,
-    batch_size: int = 32,
+    epochs: int = 30,
+    batch_size: int = 16,
     dim: int = 128,
     num_layers: int = 4,
     kernel_size: int = 3,
@@ -30,16 +31,16 @@ def train_model(
     device: str = "cpu",
     plot_dir: str = "plots",
 ) -> dict:
-    """Train ConvS2S on the synthetic reversal task.
+    """Train CurioS2S on handmade text + math dataset.
 
     Returns a dict with training history and saves a loss plot via matplotlib.
     """
     os.makedirs(plot_dir, exist_ok=True)
 
-    dataset = SyntheticSeqDataset(num_samples=2000)
+    dataset = CurioDataset(repeat=20)
     dataloader = get_dataloader(dataset, batch_size=batch_size)
 
-    model = ConvS2S(
+    model = CurioS2S(
         src_vocab_size=VOCAB_SIZE,
         tgt_vocab_size=VOCAB_SIZE,
         dim=dim,
@@ -101,19 +102,19 @@ def train_model(
     ax1.plot(history["epoch"], history["loss"], "b-o", markersize=3, label="Train Loss")
     ax1.set_xlabel("Epoch")
     ax1.set_ylabel("Loss")
-    ax1.set_title("ConvS2S Training Loss")
+    ax1.set_title("CurioS2S Training Loss")
     ax1.legend()
     ax1.grid(True, alpha=0.3)
 
     ax2.plot(history["epoch"], history["accuracy"], "r-o", markersize=3, label="Token Accuracy")
     ax2.set_xlabel("Epoch")
     ax2.set_ylabel("Accuracy")
-    ax2.set_title("ConvS2S Token Accuracy")
+    ax2.set_title("CurioS2S Token Accuracy")
     ax2.legend()
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plot_path = os.path.join(plot_dir, "convs2s_training.png")
+    plot_path = os.path.join(plot_dir, "curios2s_training.png")
     plt.savefig(plot_path, dpi=150)
     plt.close()
     print(f"\nTraining plot saved to: {plot_path}")
@@ -121,14 +122,27 @@ def train_model(
     # --- Quick inference demo ---
     model.eval()
     print("\n--- Inference Demo ---")
-    test_seqs = [["3", "5", "7"], ["9", "4", "6", "2"], ["8", "1"]]
-    for seq in test_seqs:
-        src_tensor = torch.tensor([encode(seq)], dtype=torch.long).to(device)
+    test_questions = [
+        "what is 2+2",
+        "what is 3*4",
+        "color of sky",
+        "capital of japan",
+        "opposite of hot",
+        "animal that barks",
+    ]
+    for q in test_questions:
+        src_tensor = torch.tensor([encode(q)], dtype=torch.long).to(device)
         output = model.generate(src_tensor, max_len=20, bos_idx=BOS_IDX, eos_idx=EOS_IDX)
-        out_tokens = decode(output[0].cpu().tolist())
-        print(f"  Input:    {seq}")
-        print(f"  Output:   {out_tokens}")
-        print(f"  Expected: {list(reversed(seq))}")
+        answer = decode(output[0].cpu().tolist())
+        expected = ""
+        for sq, sa in SAMPLES:
+            if sq == q:
+                expected = sa
+                break
+        print(f"  Q: {q}")
+        print(f"  A: {answer}")
+        if expected:
+            print(f"  Expected: {expected}")
         print()
 
     return {"model": model, "history": history}

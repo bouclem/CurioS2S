@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .curiosity import CuriosityDrive
+
 
 class PositionalEmbedding(nn.Module):
     """Learned positional embeddings as in Gehring et al. (2017)."""
@@ -92,6 +94,7 @@ class ConvEncoder(nn.Module):
             [ConvBlock(dim, kernel_size, causal=False, dropout=dropout) for _ in range(num_layers)]
         )
         self.output_proj = nn.Linear(dim, dim)
+        self.curiosity = CuriosityDrive(dim, num_wonder_layers=2, kernel_size=kernel_size, dropout=dropout)
 
     def forward(self, src: torch.Tensor) -> tuple:
         # src: (batch, src_len)
@@ -108,6 +111,9 @@ class ConvEncoder(nn.Module):
         for layer in self.layers:
             x = layer(x)
             conv_outputs.append(x.transpose(1, 2))  # (batch, seq_len, dim)
+
+        # Curiosity: generate wonder, process it, enrich representation
+        x, wonder = self.curiosity(x)
 
         # Last conv output, projected
         x = x.transpose(1, 2)
@@ -188,6 +194,7 @@ class ConvDecoder(nn.Module):
             [ConvBlock(dim, kernel_size, causal=True, dropout=dropout) for _ in range(num_layers)]
         )
         self.attentions = nn.ModuleList([ConvAttention(dim) for _ in range(num_layers)])
+        self.curiosity = CuriosityDrive(dim, num_wonder_layers=2, kernel_size=kernel_size, dropout=dropout)
         self.output_proj = nn.Linear(dim, vocab_size)
 
     def forward(self, tgt: torch.Tensor, enc_out: tuple, teacher_forcing: bool = True) -> torch.Tensor:
@@ -210,13 +217,23 @@ class ConvDecoder(nn.Module):
             # Add attention output as residual
             x = (x + attended.transpose(1, 2)) * math.sqrt(0.5)
 
+        # Curiosity: generate wonder, process it, enrich representation
+        x, wonder = self.curiosity(x)
+
         x = x.transpose(1, 2)  # (batch, tgt_len, dim)
         logits = self.output_proj(x)
         return logits
 
 
-class ConvS2S(nn.Module):
-    """Full Convolutional Sequence-to-Sequence model (Gehring et al., 2017).
+class CurioS2S(nn.Module):
+    """CurioS2S: Convolutional Seq2Seq with Curiosity Drive.
+
+    Based on ConvS2S (Gehring et al., 2017) with an added CuriosityDrive
+    that generates wonder states — the model's internal curiosity that
+    makes it think deeper, want answers, explore further.
+
+    Curiosity is NOT attention, NOT a detector, NOT a score.
+    It is a generative drive that creates new internal states.
 
     Args:
         src_vocab_size: Source vocabulary size.
@@ -274,3 +291,6 @@ class ConvS2S(nn.Module):
                 break
 
         return tgt
+
+# Backward-compatible alias
+ConvS2S = CurioS2S
