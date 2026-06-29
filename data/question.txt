@@ -1,0 +1,216 @@
+color of sky|blue
+color of grass|green
+color of sun|yellow
+color of blood|red
+color of coal|black
+color of snow|white
+color of ocean|blue
+color of leaf|green
+color of fire|red
+color of moon|white
+color of dirt|brown
+color of gold|yellow
+capital of france|paris
+capital of japan|tokyo
+capital of italy|rome
+capital of egypt|cairo
+capital of england|london
+capital of germany|berlin
+capital of spain|madrid
+capital of russia|moscow
+capital of china|beijing
+capital of india|delhi
+capital of brazil|brasilia
+capital of canada|ottawa
+animal that barks|dog
+animal that meows|cat
+animal that moos|cow
+animal that quacks|duck
+animal that roars|lion
+animal that chirps|bird
+animal that hisses|snake
+animal that buzzes|bee
+animal that howls|wolf
+animal that squeaks|mouse
+opposite of hot|cold
+opposite of big|small
+opposite of fast|slow
+opposite of light|dark
+opposite of up|down
+opposite of good|bad
+opposite of happy|sad
+opposite of young|old
+opposite of strong|weak
+opposite of open|close
+opposite of long|short
+opposite of wide|narrow
+opposite of loud|quiet
+opposite of empty|full
+opposite of dry|wet
+opposite of soft|hard
+opposite of sweet|sour
+opposite of rich|poor
+opposite of clean|dirty
+opposite of safe|danger
+planet closest to sun|mercury
+planet with rings|saturn
+planet we live on|earth
+planet red in color|mars
+largest planet|jupiter
+hottest planet|venus
+number of legs on spider|8
+number of legs on dog|4
+number of legs on ant|6
+number of legs on human|2
+number of days in week|7
+number of months in year|12
+number of sides on triangle|3
+number of sides on square|4
+number of sides on hexagon|6
+number of colors in rainbow|7
+color of banana|yellow
+color of apple|red
+color of orange|orange
+color of grape|purple
+color of chocolate|brown
+color of milk|white
+color of pepper|black
+color of tomato|red
+color of carrot|orange
+color of lemon|yellow
+color of lime|green
+color of cherry|red
+color of blueberry|blue
+color of strawberry|red
+color of water|blue
+color of sand|yellow
+color of cloud|white
+color of steel|gray
+color of silver|gray
+capital of australia|canberra
+capital of korea|seoul
+capital of mexico|mexico
+capital of greece|athens
+capital of portugal|lisbon
+capital of norway|oslo
+capital of sweden|stockholm
+capital of turkey|ankara
+capital of iran|tehran
+capital of iraq|baghdad
+capital of kenya|nairobi
+capital of argentina|buenos
+capital of thailand|bangkok
+capital of vietnam|hanoi
+capital of poland|warsaw
+capital of ireland|dublin
+capital of iceland|reykjavik
+capital of finland|helsinki
+capital of denmark|copenhagen
+capital of austria|vienna
+capital of belgium|brussels
+capital of netherlands|amsterdam
+capital of switzerland|bern
+animal that swims|fish
+animal that flies|bird
+animal that hops|rabbit
+animal that swings|monkey
+animal that crawls|snake
+animal that stomps|elephant
+animal that climbs|cat
+animal that digs|mole
+animal that gallops|horse
+animal that slides|snake
+opposite of black|white
+opposite of warm|cool
+opposite of thick|thin
+opposite of heavy|light
+opposite of near|far
+opposite of easy|hard
+opposite of cheap|expensive
+opposite of wild|tame
+opposite of sharp|dull
+opposite of narrow|wide
+opposite of bitter|sweet
+opposite of old|new
+opposite of slow|fast
+opposite of wet|dry
+opposite of dark|light
+opposite of short|tall
+opposite of quiet|loud
+opposite of cold|hot
+opposite of small|large
+opposite of weak|strong
+opposite of sad|happy
+opposite of ugly|beautiful
+opposite of empty|full
+opposite of push|pull
+opposite of win|lose
+opposite of love|hate
+opposite of peace|war
+opposite of boy|girl
+opposite of man|woman
+opposite of day|night
+opposite of summer|winter
+opposite of north|south
+opposite of east|west
+opposite of left|right
+opposite of begin|end
+opposite of first|last
+opposite of old|young
+opposite of alive|dead
+opposite of open|shut
+opposite of full|empty
+opposite of float|sink
+planet farthest from sun|neptune
+planet with most moons|saturn
+planet known as morning star|venus
+planet with blue color|uranus
+planet smallest in size|mercury
+planet with one moon|earth
+planet with no moons|mercury
+planet with red spot|jupiter
+planet named after love|venus
+planet named after war|mars
+planet named after sea|neptune
+planet named after sky|uranus
+planet named after king|jupiter
+largest moon of earth|moon
+largest star in sky|sun
+number of planets in system|8
+number of legs on crab|8
+number of legs on spider|8
+number of legs on fly|6
+number of legs on bee|6
+number of legs on fish|0
+number of legs on snake|0
+number of wings on bird|2
+number of wings on bee|4
+number of eyes on human|2
+number of eyes on spider|8
+number of fingers on hand|5
+number of toes on foot|5
+number of teeth in adult|32
+number of bones in body|206
+number of hearts in human|1
+number of lungs in human|2
+number of seasons in year|4
+number of hours in day|24
+number of minutes in hour|60
+number of seconds in minute|60
+number of weeks in year|52
+number of days in january|31
+number of days in february|28
+number of days in april|30
+number of sides on pentagon|5
+number of sides on octagon|8
+number of sides on circle|0
+shape with 3 sides|triangle
+shape with 4 sides|square
+shape with 5 sides|pentagon
+shape with 6 sides|hexagon
+shape with 8 sides|octagon
+shape with no sides|circle
+shape like a ball|sphere
+shape like a can|cylinder
+shape like a box|cube
+shape like a cone|cone

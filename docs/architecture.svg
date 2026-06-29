@@ -1,0 +1,309 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1600" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="encGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5276;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2471a3;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="decGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7d3c98;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#a569bd;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="curioGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b9770e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#d4ac0d;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="tinyAttnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#922b21;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#cb4335;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="ffnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e8449;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="embGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#34495e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#566573;stop-opacity:1"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2c3e50"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#cb4335"/>
+    </marker>
+    <marker id="arrowGold" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#b9770e"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="1600" fill="#f8f9fa" rx="12"/>
+
+  <!-- Title -->
+  <text x="550" y="40" text-anchor="middle" font-size="28" font-weight="bold" fill="#2c3e50">CurioNet Architecture</text>
+  <text x="550" y="65" text-anchor="middle" font-size="14" fill="#7f8c8d">Curiosity-Driven Sequence-to-Sequence — NOT attention-based</text>
+
+  <!-- ============ ENCODER ============ -->
+  <rect x="40" y="90" width="420" height="1370" rx="10" fill="#eaf2f8" stroke="#2471a3" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="250" y="115" text-anchor="middle" font-size="18" font-weight="bold" fill="#1a5276">ENCODER</text>
+
+  <!-- Source Tokens -->
+  <rect x="90" y="135" width="320" height="45" rx="8" fill="url(#embGrad)"/>
+  <text x="250" y="163" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Source Tokens (batch, src_len)</text>
+  <line x1="250" y1="180" x2="250" y2="200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Embedding -->
+  <rect x="90" y="205" width="320" height="55" rx="8" fill="url(#embGrad)"/>
+  <text x="250" y="228" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Token + Positional Embedding</text>
+  <text x="250" y="248" text-anchor="middle" font-size="11" fill="#d6eaf8">token_emb × √d + pos_emb → LayerNorm</text>
+  <line x1="250" y1="260" x2="250" y2="280" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Curiosity Block 1 ============ -->
+  <rect x="60" y="285" width="380" height="310" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="60" y="285" width="380" height="310" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="250" y="310" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 1</text>
+  <text x="250" y="325" text-anchor="middle" font-size="10" fill="#b9770e" font-style="italic">PRIMARY mechanism — generates new states</text>
+
+  <!-- Curiosity Layer -->
+  <rect x="80" y="338" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="80" y="338" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="250" y="358" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="100" y="368" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="386" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator (expand→GELU→contract→gate)</text>
+  <line x1="250" y1="396" x2="250" y2="408" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="413" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="431" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2 (Conv1d→GELU→Norm→Residual)</text>
+  <line x1="250" y1="441" x2="250" y2="453" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="458" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="476" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor (proj→GELU→norm)</text>
+  <line x1="250" y1="486" x2="250" y2="498" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="503" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="521" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual + LayerNorm</text>
+
+  <!-- FFN -->
+  <rect x="100" y="545" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="250" y="567" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN (Linear→GELU→Linear) + Residual</text>
+
+  <line x1="250" y1="595" x2="250" y2="615" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Curiosity Block 2 ============ -->
+  <rect x="60" y="620" width="380" height="310" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="60" y="620" width="380" height="310" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="250" y="645" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 2</text>
+
+  <rect x="80" y="658" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="80" y="658" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="250" y="678" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="100" y="688" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="706" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator</text>
+  <line x1="250" y1="716" x2="250" y2="728" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="733" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="751" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2</text>
+  <line x1="250" y1="761" x2="250" y2="773" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="778" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="796" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor</text>
+  <line x1="250" y1="806" x2="250" y2="818" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="823" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="841" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual</text>
+
+  <rect x="100" y="865" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="250" y="887" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN + Residual</text>
+
+  <line x1="250" y1="930" x2="250" y2="950" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Tiny Attention (every N=3) ============ -->
+  <rect x="100" y="955" width="300" height="65" rx="8" fill="url(#tinyAttnGrad)" opacity="0.15"/>
+  <rect x="100" y="955" width="300" height="65" rx="8" fill="none" stroke="url(#tinyAttnGrad)" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="250" y="978" text-anchor="middle" font-size="13" fill="#922b21" font-weight="bold">TinyAttention (single-head)</text>
+  <text x="250" y="998" text-anchor="middle" font-size="10" fill="#922b21" font-style="italic">Sparse — only every 3 blocks. NOT primary.</text>
+
+  <line x1="250" y1="1020" x2="250" y2="1040" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Curiosity Block 3 ============ -->
+  <rect x="60" y="1045" width="380" height="310" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="60" y="1045" width="380" height="310" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="250" y="1070" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 3</text>
+
+  <rect x="80" y="1083" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="80" y="1083" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="250" y="1103" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="100" y="1113" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="1131" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator</text>
+  <line x1="250" y1="1141" x2="250" y2="1153" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="1158" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="1176" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2</text>
+  <line x1="250" y1="1186" x2="250" y2="1198" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="1203" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="1221" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor</text>
+  <line x1="250" y1="1231" x2="250" y2="1243" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="100" y="1248" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="250" y="1266" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual</text>
+
+  <rect x="100" y="1290" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="250" y="1312" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN + Residual</text>
+
+  <line x1="250" y1="1355" x2="250" y2="1375" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Encoder Output -->
+  <rect x="90" y="1380" width="320" height="45" rx="8" fill="url(#encGrad)"/>
+  <text x="250" y="1408" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Encoder Output (batch, src_len, d)</text>
+
+  <!-- ============ DECODER ============ -->
+  <rect x="640" y="90" width="420" height="1370" rx="10" fill="#f5eef8" stroke="#a569bd" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="850" y="115" text-anchor="middle" font-size="18" font-weight="bold" fill="#7d3c98">DECODER</text>
+
+  <!-- Target Tokens -->
+  <rect x="690" y="135" width="320" height="45" rx="8" fill="url(#embGrad)"/>
+  <text x="850" y="163" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Target Tokens (batch, tgt_len)</text>
+  <line x1="850" y1="180" x2="850" y2="200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Embedding -->
+  <rect x="690" y="205" width="320" height="55" rx="8" fill="url(#embGrad)"/>
+  <text x="850" y="228" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Token + Positional Embedding</text>
+  <text x="850" y="248" text-anchor="middle" font-size="11" fill="#ebdef0">token_emb × √d + pos_emb → LayerNorm</text>
+  <line x1="850" y1="260" x2="850" y2="280" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Decoder Block 1 ============ -->
+  <rect x="660" y="285" width="380" height="380" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="660" y="285" width="380" height="380" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="850" y="310" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 1 + CrossAttn</text>
+
+  <!-- Curiosity Layer -->
+  <rect x="680" y="325" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="680" y="325" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="850" y="345" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="700" y="355" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="373" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator</text>
+  <line x1="850" y1="383" x2="850" y2="395" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="400" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="418" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2</text>
+  <line x1="850" y1="428" x2="850" y2="440" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="445" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="463" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor</text>
+  <line x1="850" y1="473" x2="850" y2="485" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="490" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="508" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual</text>
+
+  <!-- Cross Attention -->
+  <rect x="700" y="525" width="300" height="40" rx="6" fill="url(#tinyAttnGrad)" opacity="0.2"/>
+  <rect x="700" y="525" width="300" height="40" rx="6" fill="none" stroke="url(#tinyAttnGrad)" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="850" y="543" text-anchor="middle" font-size="11" fill="#922b21" font-weight="bold">Cross-Attention (single-head)</text>
+  <text x="850" y="558" text-anchor="middle" font-size="10" fill="#922b21" font-style="italic">Minimal — only enc→dec bridge</text>
+
+  <!-- FFN -->
+  <rect x="700" y="575" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="850" y="597" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN + Residual</text>
+
+  <line x1="850" y1="665" x2="850" y2="685" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Decoder Block 2 ============ -->
+  <rect x="660" y="690" width="380" height="380" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="660" y="690" width="380" height="380" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="850" y="715" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 2 + CrossAttn</text>
+
+  <rect x="680" y="730" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="680" y="730" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="850" y="750" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="700" y="760" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="778" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator</text>
+  <line x1="850" y1="788" x2="850" y2="800" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="805" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="823" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2</text>
+  <line x1="850" y1="833" x2="850" y2="845" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="850" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="868" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor</text>
+  <line x1="850" y1="878" x2="850" y2="890" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="895" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="913" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual</text>
+
+  <rect x="700" y="930" width="300" height="40" rx="6" fill="url(#tinyAttnGrad)" opacity="0.2"/>
+  <rect x="700" y="930" width="300" height="40" rx="6" fill="none" stroke="url(#tinyAttnGrad)" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="850" y="948" text-anchor="middle" font-size="11" fill="#922b21" font-weight="bold">Cross-Attention (single-head)</text>
+
+  <rect x="700" y="980" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="850" y="1002" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN + Residual</text>
+
+  <line x1="850" y1="1070" x2="850" y2="1090" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ Decoder Block 3 + TinyAttn ============ -->
+  <rect x="660" y="1095" width="380" height="380" rx="10" fill="url(#curioGrad)" opacity="0.08"/>
+  <rect x="660" y="1095" width="380" height="380" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2"/>
+  <text x="850" y="1120" text-anchor="middle" font-size="14" fill="#b9770e" font-weight="bold">CuriosityBlock 3 + CrossAttn</text>
+
+  <rect x="680" y="1135" width="340" height="180" rx="8" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="680" y="1135" width="340" height="180" rx="8" fill="none" stroke="url(#curioGrad)" stroke-width="1.5"/>
+  <text x="850" y="1155" text-anchor="middle" font-size="12" fill="#b9770e" font-weight="bold">CuriosityLayer</text>
+
+  <rect x="700" y="1165" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="1183" text-anchor="middle" font-size="11" fill="white" font-weight="bold">1. WonderGenerator</text>
+  <line x1="850" y1="1193" x2="850" y2="1205" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="1210" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="1228" text-anchor="middle" font-size="11" fill="white" font-weight="bold">2. WonderConv × 2</text>
+  <line x1="850" y1="1238" x2="850" y2="1250" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="1255" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="1273" text-anchor="middle" font-size="11" fill="white" font-weight="bold">3. InsightExtractor</text>
+  <line x1="850" y1="1283" x2="850" y2="1295" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrowGold)"/>
+
+  <rect x="700" y="1300" width="300" height="28" rx="5" fill="url(#curioGrad)"/>
+  <text x="850" y="1318" text-anchor="middle" font-size="11" fill="white" font-weight="bold">4. Gated Integration + Residual</text>
+
+  <rect x="700" y="1335" width="300" height="40" rx="6" fill="url(#tinyAttnGrad)" opacity="0.2"/>
+  <rect x="700" y="1335" width="300" height="40" rx="6" fill="none" stroke="url(#tinyAttnGrad)" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="850" y="1353" text-anchor="middle" font-size="11" fill="#922b21" font-weight="bold">Cross-Attention (single-head)</text>
+
+  <rect x="700" y="1385" width="300" height="35" rx="6" fill="url(#ffnGrad)"/>
+  <text x="850" y="1407" text-anchor="middle" font-size="12" fill="white" font-weight="bold">FFN + Residual</text>
+
+  <line x1="850" y1="1475" x2="850" y2="1495" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output -->
+  <rect x="690" y="1500" width="320" height="45" rx="8" fill="url(#decGrad)"/>
+  <text x="850" y="1528" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Output Projection → Vocab Logits</text>
+
+  <!-- ============ CROSS CONNECTION ============ -->
+  <path d="M 410 1403 Q 530 1403 530 545 Q 530 545 660 545" fill="none" stroke="#cb4335" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arrowRed)"/>
+  <text x="530" y="500" text-anchor="middle" font-size="11" fill="#cb4335" font-weight="bold">enc_out</text>
+  <text x="530" y="515" text-anchor="middle" font-size="10" fill="#cb4335">(to cross-attn)</text>
+
+  <!-- ============ LEGEND ============ -->
+  <rect x="40" y="1480" width="560" height="100" rx="10" fill="#fdfefe" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="60" y="1505" font-size="14" font-weight="bold" fill="#2c3e50">Legend</text>
+
+  <rect x="60" y="1518" width="20" height="18" rx="4" fill="url(#curioGrad)"/>
+  <text x="90" y="1531" font-size="11" fill="#2c3e50">Curiosity (PRIMARY — generates new states)</text>
+
+  <rect x="60" y="1542" width="20" height="18" rx="4" fill="url(#tinyAttnGrad)"/>
+  <text x="90" y="1555" font-size="11" fill="#2c3e50">Tiny Attention (sparse, minimal — NOT primary)</text>
+
+  <rect x="60" y="1566" width="20" height="18" rx="4" fill="url(#ffnGrad)"/>
+  <text x="90" y="1579" font-size="11" fill="#2c3e50">FFN (feed-forward network)</text>
+
+  <rect x="350" y="1518" width="20" height="18" rx="4" fill="url(#embGrad)"/>
+  <text x="380" y="1531" font-size="11" fill="#2c3e50">Embeddings</text>
+
+  <line x1="350" y1="1550" x2="400" y2="1550" stroke="#cb4335" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arrowRed)"/>
+  <text x="410" y="1555" font-size="11" fill="#2c3e50">enc→dec data flow</text>
+
+  <text x="350" y="1579" font-size="10" fill="#7f8c8d" font-style="italic">Curiosity = NOT attention, NOT detector, NOT score</text>
+</svg>

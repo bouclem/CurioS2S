@@ -1,0 +1,36 @@
+# Python
+.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project artifacts
+checkpoints/
+*.pt
+*.pth
+plots/
+*.png
+
+# Downloaded data
+data/wikitext2/
+data/tokenizer.txt
+data/wikitext2_raw.zip

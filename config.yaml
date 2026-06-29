@@ -1,0 +1,52 @@
+# CurioNet Configuration
+
+# Dataset
+dataset:
+  name: "wikitext-2-raw-v1"
+  source: "https://dax-cdn.cdn.appdomain.cloud/dax-wikitext-2/1.0.1/wikitext-2-raw-v1.zip"
+  cache_dir: "data/wikitext2"
+  max_train_chars: 500000
+  max_val_chars: 100000
+  max_test_chars: 100000
+
+# Tokenizer
+tokenizer:
+  type: "char"
+  vocab_path: "data/tokenizer.txt"
+
+# Model — CurioNet (~300K params)
+curionet:
+  dim: 46
+  num_layers: 2
+  num_wonder_convs: 2
+  kernel_size: 3
+  dropout: 0.1
+  curiosity_budget: 1
+  attn_every: 3
+  max_len: 68
+
+# Model — Transformer (~300K params, for comparison)
+transformer:
+  dim: 64
+  num_layers: 2
+  num_heads: 4
+  dropout: 0.1
+  max_len: 68
+
+# Training
+training:
+  epochs: 30
+  batch_size: 64
+  seq_len: 64
+  lr: 0.0003
+  warmup_epochs: 5
+  patience: 4
+  grad_clip: 1.0
+
+# Device
+device: "cuda"
+
+# Paths
+paths:
+  plot_dir: "plots"
+  checkpoint_dir: "checkpoints"
