@@ -57,8 +57,8 @@ def _load_data_file(filename: str) -> list:
 
 
 def load_samples() -> list:
-    """Load all samples from data/talk.txt and data/math.txt."""
-    return _load_data_file("talk.txt") + _load_data_file("math.txt")
+    """Load all samples from data/question.txt and data/math.txt."""
+    return _load_data_file("question.txt") + _load_data_file("math.txt")
 
 
 # Loaded at import time for convenience

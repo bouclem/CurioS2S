@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <linearGradient id="encGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5276;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2471a3;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="decGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7d3c98;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#a569bd;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="curioGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b9770e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#d4ac0d;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="convGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e8449;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="attnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#922b21;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#cb4335;stop-opacity:1"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2c3e50"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#cb4335"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="1400" fill="#f8f9fa" rx="12"/>
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="28" font-weight="bold" fill="#2c3e50">CurioS2S Architecture</text>
+  <text x="500" y="65" text-anchor="middle" font-size="14" fill="#7f8c8d">Convolutional Seq2Seq with Curiosity Drive</text>
+
+  <!-- ============ ENCODER ============ -->
+  <rect x="50" y="90" width="380" height="1150" rx="10" fill="#eaf2f8" stroke="#2471a3" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="240" y="115" text-anchor="middle" font-size="18" font-weight="bold" fill="#1a5276">ENCODER</text>
+
+  <!-- Source Tokens -->
+  <rect x="100" y="135" width="280" height="45" rx="8" fill="url(#encGrad)"/>
+  <text x="240" y="163" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Source Tokens (batch, src_len)</text>
+  <line x1="240" y1="180" x2="240" y2="200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Positional Embedding -->
+  <rect x="100" y="205" width="280" height="55" rx="8" fill="url(#encGrad)"/>
+  <text x="240" y="228" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Positional Embedding</text>
+  <text x="240" y="248" text-anchor="middle" font-size="11" fill="#d6eaf8">token_emb × √d + pos_emb</text>
+  <line x1="240" y1="260" x2="240" y2="280" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Linear Projection -->
+  <rect x="120" y="285" width="240" height="40" rx="8" fill="#5dade2"/>
+  <text x="240" y="310" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Linear Projection</text>
+  <line x1="240" y1="325" x2="240" y2="345" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ConvBlock x N (Encoder) -->
+  <rect x="80" y="350" width="320" height="200" rx="10" fill="url(#convGrad)" opacity="0.15"/>
+  <rect x="80" y="350" width="320" height="200" rx="10" fill="none" stroke="url(#convGrad)" stroke-width="2"/>
+  <text x="240" y="375" text-anchor="middle" font-size="14" fill="#1e8449" font-weight="bold">ConvBlock × N</text>
+
+  <rect x="110" y="385" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="240" y="407" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Conv1d (kernel=3, symmetric pad)</text>
+  <line x1="240" y1="420" x2="240" y2="435" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="110" y="440" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="240" y="462" text-anchor="middle" font-size="12" fill="white" font-weight="bold">GLU: A × σ(B)</text>
+  <line x1="240" y1="475" x2="240" y2="490" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="110" y="495" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="240" y="517" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Dropout + Residual × √0.5</text>
+
+  <line x1="240" y1="550" x2="240" y2="575" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- CuriosityDrive (Encoder) -->
+  <rect x="70" y="580" width="340" height="280" rx="10" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="70" y="580" width="340" height="280" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2.5"/>
+  <text x="240" y="608" text-anchor="middle" font-size="15" fill="#b9770e" font-weight="bold">CuriosityDrive</text>
+  <text x="240" y="625" text-anchor="middle" font-size="10" fill="#b9770e" font-style="italic">NOT attention · NOT detector · NOT score</text>
+
+  <rect x="100" y="638" width="280" height="40" rx="6" fill="url(#curioGrad)"/>
+  <text x="240" y="655" text-anchor="middle" font-size="12" fill="white" font-weight="bold">1. Generate Wonder</text>
+  <text x="240" y="670" text-anchor="middle" font-size="10" fill="#fef9e7">WonderGenerator: expand→GELU→contract→gate</text>
+  <line x1="240" y1="678" x2="240" y2="693" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="100" y="698" width="280" height="40" rx="6" fill="url(#curioGrad)"/>
+  <text x="240" y="715" text-anchor="middle" font-size="12" fill="white" font-weight="bold">2. Process Wonder</text>
+  <text x="240" y="730" text-anchor="middle" font-size="10" fill="#fef9e7">WonderConv × 2: Conv1d→GELU→Norm→Residual</text>
+  <line x1="240" y1="738" x2="240" y2="753" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="100" y="758" width="280" height="35" rx="6" fill="url(#curioGrad)"/>
+  <text x="240" y="780" text-anchor="middle" font-size="12" fill="white" font-weight="bold">3. Generate Insights</text>
+  <line x1="240" y1="793" x2="240" y2="808" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="100" y="813" width="280" height="35" rx="6" fill="url(#curioGrad)"/>
+  <text x="240" y="835" text-anchor="middle" font-size="12" fill="white" font-weight="bold">4. Integrate Insights → Enriched Rep</text>
+
+  <line x1="240" y1="860" x2="240" y2="880" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output Projection (Encoder) -->
+  <rect x="120" y="885" width="240" height="40" rx="8" fill="#5dade2"/>
+  <text x="240" y="910" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Output Projection (Linear)</text>
+  <line x1="240" y1="925" x2="240" y2="945" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Encoder Output -->
+  <rect x="100" y="950" width="280" height="45" rx="8" fill="url(#encGrad)"/>
+  <text x="240" y="978" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Encoder Output (batch, src_len, d)</text>
+
+  <!-- ============ DECODER ============ -->
+  <rect x="570" y="90" width="380" height="1150" rx="10" fill="#f5eef8" stroke="#a569bd" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="760" y="115" text-anchor="middle" font-size="18" font-weight="bold" fill="#7d3c98">DECODER</text>
+
+  <!-- Target Tokens -->
+  <rect x="620" y="135" width="280" height="45" rx="8" fill="url(#decGrad)"/>
+  <text x="760" y="163" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Target Tokens (batch, tgt_len)</text>
+  <line x1="760" y1="180" x2="760" y2="200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Positional Embedding -->
+  <rect x="620" y="205" width="280" height="55" rx="8" fill="url(#decGrad)"/>
+  <text x="760" y="228" text-anchor="middle" font-size="14" fill="white" font-weight="bold">Positional Embedding</text>
+  <text x="760" y="248" text-anchor="middle" font-size="11" fill="#ebdef0">token_emb × √d + pos_emb</text>
+  <line x1="760" y1="260" x2="760" y2="280" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Linear Projection -->
+  <rect x="640" y="285" width="240" height="40" rx="8" fill="#bb8fce"/>
+  <text x="760" y="310" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Linear Projection</text>
+  <line x1="760" y1="325" x2="760" y2="345" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ConvBlock x N (Decoder) -->
+  <rect x="600" y="350" width="320" height="200" rx="10" fill="url(#convGrad)" opacity="0.15"/>
+  <rect x="600" y="350" width="320" height="200" rx="10" fill="none" stroke="url(#convGrad)" stroke-width="2"/>
+  <text x="760" y="375" text-anchor="middle" font-size="14" fill="#1e8449" font-weight="bold">ConvBlock × N (Causal)</text>
+
+  <rect x="630" y="385" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="760" y="407" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Causal Conv1d (left-pad)</text>
+  <line x1="760" y1="420" x2="760" y2="435" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="630" y="440" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="760" y="462" text-anchor="middle" font-size="12" fill="white" font-weight="bold">GLU: A × σ(B)</text>
+  <line x1="760" y1="475" x2="760" y2="490" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="630" y="495" width="260" height="35" rx="6" fill="url(#convGrad)"/>
+  <text x="760" y="517" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Dropout + Residual × √0.5</text>
+
+  <line x1="760" y1="550" x2="760" y2="575" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ConvAttention -->
+  <rect x="590" y="580" width="340" height="120" rx="10" fill="url(#attnGrad)" opacity="0.12"/>
+  <rect x="590" y="580" width="340" height="120" rx="10" fill="none" stroke="url(#attnGrad)" stroke-width="2.5"/>
+  <text x="760" y="608" text-anchor="middle" font-size="15" fill="#922b21" font-weight="bold">ConvAttention × N</text>
+
+  <rect x="620" y="620" width="280" height="35" rx="6" fill="url(#attnGrad)"/>
+  <text x="760" y="642" text-anchor="middle" font-size="12" fill="white" font-weight="bold">Scaled Dot-Product: Q·Kᵀ / √d</text>
+  <line x1="760" y1="655" x2="760" y2="668" stroke="#922b21" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="673" width="280" height="20" rx="6" fill="url(#attnGrad)"/>
+  <text x="760" y="687" text-anchor="middle" font-size="11" fill="white" font-weight="bold">softmax → context (enc_emb + enc_conv)</text>
+
+  <line x1="760" y1="700" x2="760" y2="715" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- CuriosityDrive (Decoder) -->
+  <rect x="590" y="720" width="340" height="280" rx="10" fill="url(#curioGrad)" opacity="0.12"/>
+  <rect x="590" y="720" width="340" height="280" rx="10" fill="none" stroke="url(#curioGrad)" stroke-width="2.5"/>
+  <text x="760" y="748" text-anchor="middle" font-size="15" fill="#b9770e" font-weight="bold">CuriosityDrive</text>
+  <text x="760" y="765" text-anchor="middle" font-size="10" fill="#b9770e" font-style="italic">NOT attention · NOT detector · NOT score</text>
+
+  <rect x="620" y="778" width="280" height="40" rx="6" fill="url(#curioGrad)"/>
+  <text x="760" y="795" text-anchor="middle" font-size="12" fill="white" font-weight="bold">1. Generate Wonder</text>
+  <text x="760" y="810" text-anchor="middle" font-size="10" fill="#fef9e7">WonderGenerator: expand→GELU→contract→gate</text>
+  <line x1="760" y1="818" x2="760" y2="833" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="838" width="280" height="40" rx="6" fill="url(#curioGrad)"/>
+  <text x="760" y="855" text-anchor="middle" font-size="12" fill="white" font-weight="bold">2. Process Wonder</text>
+  <text x="760" y="870" text-anchor="middle" font-size="10" fill="#fef9e7">WonderConv × 2: Conv1d→GELU→Norm→Residual</text>
+  <line x1="760" y1="878" x2="760" y2="893" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="898" width="280" height="35" rx="6" fill="url(#curioGrad)"/>
+  <text x="760" y="920" text-anchor="middle" font-size="12" fill="white" font-weight="bold">3. Generate Insights</text>
+  <line x1="760" y1="933" x2="760" y2="948" stroke="#b9770e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="953" width="280" height="35" rx="6" fill="url(#curioGrad)"/>
+  <text x="760" y="975" text-anchor="middle" font-size="12" fill="white" font-weight="bold">4. Integrate Insights → Enriched Rep</text>
+
+  <line x1="760" y1="1000" x2="760" y2="1020" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output Projection (Decoder) -->
+  <rect x="640" y="1025" width="240" height="40" rx="8" fill="#bb8fce"/>
+  <text x="760" y="1050" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Output Projection → Vocab</text>
+  <line x1="760" y1="1065" x2="760" y2="1085" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Vocab Logits -->
+  <rect x="620" y="1090" width="280" height="45" rx="8" fill="url(#decGrad)"/>
+  <text x="760" y="1118" text-anchor="middle" font-size="13" fill="white" font-weight="bold">Vocab Logits (batch, tgt_len, vocab)</text>
+  <line x1="760" y1="1135" x2="760" y2="1155" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Output -->
+  <rect x="640" y="1160" width="240" height="40" rx="8" fill="#2c3e50"/>
+  <text x="760" y="1185" text-anchor="middle" font-size="14" fill="white" font-weight="bold">softmax → Output Tokens</text>
+
+  <!-- ============ CROSS CONNECTION ============ -->
+  <!-- Encoder → Decoder attention arrow -->
+  <path d="M 380 975 Q 480 975 480 640 Q 480 610 590 640" fill="none" stroke="#cb4335" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arrowRed)"/>
+  <text x="480" y="580" text-anchor="middle" font-size="11" fill="#cb4335" font-weight="bold">enc_out</text>
+  <text x="480" y="595" text-anchor="middle" font-size="10" fill="#cb4335">(emb + conv)</text>
+
+  <!-- ============ LEGEND ============ -->
+  <rect x="50" y="1270" width="900" height="110" rx="10" fill="#fdfefe" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="70" y="1295" font-size="14" font-weight="bold" fill="#2c3e50">Legend</text>
+
+  <rect x="70" y="1310" width="20" height="20" rx="4" fill="url(#encGrad)"/>
+  <text x="100" y="1325" font-size="12" fill="#2c3e50">Encoder components</text>
+
+  <rect x="250" y="1310" width="20" height="20" rx="4" fill="url(#decGrad)"/>
+  <text x="280" y="1325" font-size="12" fill="#2c3e50">Decoder components</text>
+
+  <rect x="430" y="1310" width="20" height="20" rx="4" fill="url(#convGrad)"/>
+  <text x="460" y="1325" font-size="12" fill="#2c3e50">Conv blocks</text>
+
+  <rect x="570" y="1310" width="20" height="20" rx="4" fill="url(#attnGrad)"/>
+  <text x="600" y="1325" font-size="12" fill="#2c3e50">Attention</text>
+
+  <rect x="690" y="1310" width="20" height="20" rx="4" fill="url(#curioGrad)"/>
+  <text x="720" y="1325" font-size="12" fill="#2c3e50">Curiosity Drive (generative, NOT attn)</text>
+
+  <line x1="70" y1="1350" x2="120" y2="1350" stroke="#cb4335" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arrowRed)"/>
+  <text x="130" y="1355" font-size="12" fill="#2c3e50">Encoder → Decoder data flow</text>
+
+  <line x1="380" y1="1350" x2="430" y2="1350" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="440" y="1355" font-size="12" fill="#2c3e50">Sequential flow</text>
+</svg>

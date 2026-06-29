@@ -1,4 +1,5 @@
 import os
+import sys
 import torch
 
 from .model import CurioS2S
@@ -10,9 +11,10 @@ from .data import (
     encode,
     decode,
     load_samples,
+    IDX_TO_CHAR,
 )
 
-CHECKPOINT_PATH = os.path.join("checkpoints", "curios2s.pt")
+CHECKPOINT_PATH = os.path.join("checkpoints", "best.pt")
 
 
 def load_model(checkpoint_path: str = CHECKPOINT_PATH, device: str = "cpu") -> CurioS2S:
@@ -47,17 +49,47 @@ def ask(model: CurioS2S, question: str, device: str = "cpu", max_len: int = 30) 
     return decode(output[0].cpu().tolist())
 
 
+def ask_stream(model: CurioS2S, question: str, device: str = "cpu", max_len: int = 30):
+    """Ask the model a question, yielding one character at a time.
+
+    Generator that produces each character as it's generated.
+    """
+    model.eval()
+    src = torch.tensor([encode(question)], dtype=torch.long).to(device)
+    enc_out = model.encoder(src)
+
+    tgt = torch.full((1, 1), BOS_IDX, dtype=torch.long, device=device)
+    finished = False
+
+    for _ in range(max_len - 1):
+        logits = model.decoder(tgt, enc_out)
+        next_token = logits[:, -1, :].argmax(dim=-1).item()
+
+        if next_token == EOS_IDX:
+            break
+        if next_token == PAD_IDX:
+            if finished:
+                break
+            continue
+
+        char = IDX_TO_CHAR.get(next_token, "?")
+        yield char
+
+        tgt = torch.cat([tgt, torch.tensor([[next_token]], dtype=torch.long, device=device)], dim=1)
+
+
 def chat():
     """Interactive chat with CurioS2S.
 
     Loads saved weights and lets you ask questions.
+    Uses streaming output — characters appear one by one.
     Type 'quit' or 'exit' to leave.
     """
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}")
 
     model = load_model(device=device)
-    print("CurioS2S loaded! Ask me anything.\n")
+    print("CurioS2S loaded! Ask me anything. (streaming output)\n")
 
     samples = load_samples()
     known_questions = {q for q, _ in samples}
@@ -76,7 +108,15 @@ def chat():
         if not question:
             continue
 
-        answer = ask(model, question, device=device)
+        # --- Streaming output ---
+        sys.stdout.write("CurioS2S> ")
+        sys.stdout.flush()
+        answer = ""
+        for char in ask_stream(model, question, device=device):
+            sys.stdout.write(char)
+            sys.stdout.flush()
+            answer += char
+        sys.stdout.write("\n")
 
         if question in known_questions:
             expected = ""
@@ -85,9 +125,7 @@ def chat():
                     expected = a
                     break
             marker = "OK" if answer == expected else "MISS"
-            print(f"CurioS2S> {answer}  [{marker}, expected: {expected}]")
-        else:
-            print(f"CurioS2S> {answer}")
+            print(f"  [{marker}, expected: {expected}]")
         print()
 
 

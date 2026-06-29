@@ -6,20 +6,29 @@ Based on ConvS2S (Gehring et al., 2017) with an added curiosity module that is *
 
 ## Architecture
 
+![CurioS2S Architecture](architecture.svg)
+
+> Open `docs/architecture.svg` in a browser for the full interactive diagram.
+
+### Data Flow Summary
+
 ```
-CurioS2S
-├── ConvEncoder
-│   ├── PositionalEmbedding (token + position)
-│   ├── ConvBlock x N (Conv1d → GLU → residual)
-│   └── CuriosityDrive (wonder generation → thinking → insights)
-│
-├── ConvDecoder
-│   ├── PositionalEmbedding (token + position)
-│   ├── ConvBlock x N (causal Conv1d → GLU → residual)
-│   ├── ConvAttention x N (decoder ↔ encoder)
-│   └── CuriosityDrive (wonder generation → thinking → insights)
-│
-└── Output projection → vocab logits
+Input Question ──→ [Encoder] ───────────────────────┐
+                    │ PosEmb → ConvBlocks           │
+                    │ → CuriosityDrive              │
+                    │ → enc_out                     │
+                    │                               ▼
+                    │                    [Decoder]
+                    │                    │ PosEmb → ConvBlocks
+                    │                    │ → ConvAttention ← enc_out
+                    │                    │ → CuriosityDrive
+                    │                    │ → Output Proj
+                    │                    ▼
+                    │              char logits
+                    │                    │
+                    │              greedy decode
+                    │                    │
+                    └──────────────→ Output Answer
 ```
 
 ### Curiosity Drive
@@ -37,15 +46,15 @@ What it does:
 ```
 Net/
 ├── data/
-│   ├── math.txt              # 80 math Q&A pairs (add, sub, mul, div)
-│   └── talk.txt              # 68 text fact Q&A pairs (colors, capitals, etc.)
+│   ├── math.txt              # 180 math Q&A pairs (add, sub, mul, div)
+│   └── question.txt          # 216 text fact Q&A pairs (colors, capitals, etc.)
 ├── curios2s/
 │   ├── __init__.py           # Package exports
 │   ├── model.py              # CurioS2S, ConvEncoder, ConvDecoder, ConvAttention
 │   ├── curiosity.py          # CuriosityDrive, WonderGenerator, WonderConv
 │   ├── data.py               # Char-level vocab, CurioDataset, file loading
-│   ├── train.py              # Training loop + matplotlib plots + weight saving
-│   └── chat.py               # Interactive chat with saved weights
+│   ├── train.py              # Training loop + warmup LR + early stopping + PPL + plots
+│   └── chat.py               # Interactive chat with streaming output
 ├── checkpoints/              # Saved model weights (gitignored)
 ├── plots/                    # Training plots (gitignored)
 ├── docs/
