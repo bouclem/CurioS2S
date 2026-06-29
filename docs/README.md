@@ -81,12 +81,34 @@ Net/
 
 ## Dataset
 
-**WikiText-2** (raw) — downloaded automatically via the HuggingFace `datasets` library on first run.
+### Download
 
-- Character-level tokenization via `CharTokenizer`
-- Text continuation task: input = first half of chunk, target = second half
-- Configurable chunk size (default `seq_len=64`)
-- Cached in `data/wikitext2/`
+WikiText-2 (raw) is downloaded automatically via the HuggingFace **`datasets`** library on first run — no manual download needed.
+
+```python
+from datasets import load_dataset
+ds = load_dataset("wikitext", "wikitext-2-raw-v1", cache_dir="data/wikitext2")
+```
+
+- **Splits**: `train`, `validation`, `test`
+- **Cache**: `data/wikitext2/` (gitignored)
+- **First run**: downloads ~12MB, extracts and caches locally
+- **Subsequent runs**: loads from cache, no network access
+
+### Tokenizer
+
+A `CharTokenizer` is built from the training split on first run:
+- Scans all characters in the training text
+- Builds vocab: `<pad>`, `<bos>`, `<eos>` + all unique characters
+- Saved to `data/tokenizer.txt` (gitignored)
+- Loaded from file on subsequent runs
+
+### Task
+
+Text continuation — character-level:
+- Text is split into fixed-length chunks (`seq_len=64`)
+- Input = first half of chunk, target = second half
+- Model learns to predict the continuation of text
 
 ## Usage
 
@@ -95,6 +117,16 @@ Net/
 ```bash
 pip install -r requirements.txt
 ```
+
+### Download Dataset
+
+WikiText-2 downloads automatically on first run of `train` or `compare`. To download it manually beforehand:
+
+```bash
+python -c "from datasets import load_dataset; load_dataset('wikitext', 'wikitext-2-raw-v1', cache_dir='data/wikitext2')"
+```
+
+This caches the dataset in `data/wikitext2/` so subsequent runs work offline.
 
 ### Train CurioNet only
 
