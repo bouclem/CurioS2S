@@ -291,7 +291,8 @@ class CurioNet(nn.Module):
         return logits
 
     @torch.no_grad()
-    def generate(self, src: torch.Tensor, max_len: int = 50, bos_idx: int = 1, eos_idx: int = 2) -> torch.Tensor:
+    def generate(self, src: torch.Tensor, max_len: int = 50, bos_idx: int = 1, eos_idx: int = 2,
+                 min_len: int = 10) -> torch.Tensor:
         """Greedy decoding for inference."""
         self.eval()
         batch = src.size(0)
@@ -301,9 +302,14 @@ class CurioNet(nn.Module):
         tgt = torch.full((batch, 1), bos_idx, dtype=torch.long, device=device)
         finished = torch.zeros(batch, dtype=torch.bool, device=device)
 
-        for _ in range(max_len - 1):
+        for step in range(max_len - 1):
             logits = self.decoder(tgt, enc_out)
-            next_token = logits[:, -1, :].argmax(dim=-1)
+            top2 = logits[:, -1, :].topk(2, dim=-1)
+            next_token = top2.indices[:, 0]
+            # Don't allow eos until min_len is reached — use second-best token
+            if step < min_len:
+                eos_mask = next_token == eos_idx
+                next_token = torch.where(eos_mask, top2.indices[:, 1], next_token)
             next_token = next_token.masked_fill(finished, self.decoder.padding_idx)
             tgt = torch.cat([tgt, next_token.unsqueeze(1)], dim=1)
             finished = finished | (next_token == eos_idx)

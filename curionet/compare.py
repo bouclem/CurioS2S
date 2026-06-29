@@ -51,6 +51,13 @@ def _save_checkpoint(model, config, history, path):
     }, path)
 
 
+def _load_checkpoint(model, path, device):
+    """Load weights into model from checkpoint. Returns history dict or empty dict."""
+    ckpt = torch.load(path, map_location=device, weights_only=False)
+    model.load_state_dict(ckpt["model_state_dict"])
+    return ckpt.get("history", {"epoch": [], "train_loss": [], "train_ppl": [], "val_loss": [], "val_ppl": [], "lr": []})
+
+
 def _train_one(
     model: nn.Module,
     name: str,
@@ -266,25 +273,39 @@ def compare(
     print("=" * 70)
     print()
 
-    # --- Train CurioNet ---
-    print("=" * 70)
-    print("Training CurioNet (curiosity-based)")
-    print("=" * 70)
-    curionet_history = _train_one(
-        curionet, "curionet", train_loader, val_loader,
-        epochs, lr, device, patience, warmup_epochs,
-        checkpoint_dir=checkpoint_dir, model_config=curionet_config,
-    )
+    # --- Train or load CurioNet ---
+    curionet_ckpt = os.path.join(checkpoint_dir, "curionet_best.pt")
+    if os.path.exists(curionet_ckpt):
+        print("=" * 70)
+        print("Loading CurioNet from checkpoint (skipping training)")
+        print("=" * 70)
+        curionet_history = _load_checkpoint(curionet, curionet_ckpt, device)
+    else:
+        print("=" * 70)
+        print("Training CurioNet (curiosity-based)")
+        print("=" * 70)
+        curionet_history = _train_one(
+            curionet, "curionet", train_loader, val_loader,
+            epochs, lr, device, patience, warmup_epochs,
+            checkpoint_dir=checkpoint_dir, model_config=curionet_config,
+        )
 
-    # --- Train Transformer ---
-    print("\n" + "=" * 70)
-    print("Training Transformer (attention-based)")
-    print("=" * 70)
-    transformer_history = _train_one(
-        transformer, "transformer", train_loader, val_loader,
-        epochs, lr, device, patience, warmup_epochs,
-        checkpoint_dir=checkpoint_dir, model_config=transformer_config,
-    )
+    # --- Train or load Transformer ---
+    transformer_ckpt = os.path.join(checkpoint_dir, "transformer_best.pt")
+    if os.path.exists(transformer_ckpt):
+        print("\n" + "=" * 70)
+        print("Loading Transformer from checkpoint (skipping training)")
+        print("=" * 70)
+        transformer_history = _load_checkpoint(transformer, transformer_ckpt, device)
+    else:
+        print("\n" + "=" * 70)
+        print("Training Transformer (attention-based)")
+        print("=" * 70)
+        transformer_history = _train_one(
+            transformer, "transformer", train_loader, val_loader,
+            epochs, lr, device, patience, warmup_epochs,
+            checkpoint_dir=checkpoint_dir, model_config=transformer_config,
+        )
 
     # --- Test evaluation ---
     print("\n" + "=" * 70)
