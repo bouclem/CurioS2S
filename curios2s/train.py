@@ -30,12 +30,15 @@ def train_model(
     lr: float = 3e-4,
     device: str = "cpu",
     plot_dir: str = "plots",
+    checkpoint_dir: str = "checkpoints",
 ) -> dict:
     """Train CurioS2S on handmade text + math dataset.
 
     Returns a dict with training history and saves a loss plot via matplotlib.
+    Saves model weights to checkpoint_dir/curios2s.pt.
     """
     os.makedirs(plot_dir, exist_ok=True)
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
     dataset = CurioDataset(repeat=20)
     dataloader = get_dataloader(dataset, batch_size=batch_size)
@@ -144,6 +147,23 @@ def train_model(
         if expected:
             print(f"  Expected: {expected}")
         print()
+
+    # --- Save model weights ---
+    checkpoint_path = os.path.join(checkpoint_dir, "curios2s.pt")
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "config": {
+            "src_vocab_size": VOCAB_SIZE,
+            "tgt_vocab_size": VOCAB_SIZE,
+            "dim": dim,
+            "num_layers": num_layers,
+            "kernel_size": kernel_size,
+            "dropout": 0.1,
+            "padding_idx": PAD_IDX,
+        },
+        "history": history,
+    }, checkpoint_path)
+    print(f"Model weights saved to: {checkpoint_path}")
 
     return {"model": model, "history": history}
 

@@ -1,3 +1,4 @@
+import os
 import torch
 from torch.utils.data import Dataset, DataLoader
 
@@ -37,53 +38,31 @@ def decode(ids: list) -> str:
     return "".join(chars)
 
 
-# Handmade dataset: text facts + math problems (not stories)
-SAMPLES = [
-    # Math: addition
-    ("what is 2+2", "4"),
-    ("what is 3+5", "8"),
-    ("what is 7+1", "8"),
-    ("what is 9+3", "12"),
-    ("what is 4+6", "10"),
-    ("what is 5+5", "10"),
-    # Math: subtraction
-    ("what is 4-2", "2"),
-    ("what is 8-3", "5"),
-    ("what is 10-7", "3"),
-    ("what is 6-4", "2"),
-    ("what is 9-1", "8"),
-    # Math: multiplication
-    ("what is 3*4", "12"),
-    ("what is 5*2", "10"),
-    ("what is 7*3", "21"),
-    ("what is 6*6", "36"),
-    ("what is 2*8", "16"),
-    # Math: division
-    ("what is 8/2", "4"),
-    ("what is 9/3", "3"),
-    ("what is 10/5", "2"),
-    ("what is 12/4", "3"),
-    # Text: facts (not stories)
-    ("color of sky", "blue"),
-    ("color of grass", "green"),
-    ("color of sun", "yellow"),
-    ("color of blood", "red"),
-    ("color of coal", "black"),
-    ("color of snow", "white"),
-    ("capital of france", "paris"),
-    ("capital of japan", "tokyo"),
-    ("capital of italy", "rome"),
-    ("capital of egypt", "cairo"),
-    ("animal that barks", "dog"),
-    ("animal that meows", "cat"),
-    ("animal that moos", "cow"),
-    ("opposite of hot", "cold"),
-    ("opposite of big", "small"),
-    ("opposite of fast", "slow"),
-    ("opposite of light", "dark"),
-    ("opposite of up", "down"),
-    ("opposite of good", "bad"),
-]
+# Path to data files
+_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+
+
+def _load_data_file(filename: str) -> list:
+    """Load Q|A pairs from a data file. Each line: question|answer"""
+    filepath = os.path.join(_DATA_DIR, filename)
+    pairs = []
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or "|" not in line:
+                continue
+            q, a = line.split("|", 1)
+            pairs.append((q.strip(), a.strip()))
+    return pairs
+
+
+def load_samples() -> list:
+    """Load all samples from data/talk.txt and data/math.txt."""
+    return _load_data_file("talk.txt") + _load_data_file("math.txt")
+
+
+# Loaded at import time for convenience
+SAMPLES = load_samples()
 
 
 class CurioDataset(Dataset):
@@ -95,7 +74,7 @@ class CurioDataset(Dataset):
 
     def __init__(self, samples: list = None, repeat: int = 10):
         if samples is None:
-            samples = SAMPLES
+            samples = load_samples()
         self.samples = []
         for src_text, tgt_text in samples:
             self.samples.append((encode(src_text), encode(tgt_text)))
