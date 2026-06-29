@@ -142,9 +142,7 @@ class TransformerSeq2Seq(nn.Module):
         x = self.tgt_emb_norm(x)
         x = self.tgt_emb_dropout(x)
 
-        causal = torch.triu(torch.ones(tgt_len, tgt_len, device=tgt.device), diagonal=1).bool()
-        causal_mask = causal.unsqueeze(0).expand(batch * 4, -1, -1).reshape(batch, 4, tgt_len, tgt_len)
-        causal_mask = causal_mask[:, 0]
+        causal_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=tgt.device), diagonal=1).bool()
 
         enc_key_mask = ~enc_mask
         tgt_key_mask = ~tgt_mask
@@ -171,8 +169,7 @@ class TransformerSeq2Seq(nn.Module):
             x = self.tgt_token_emb(tgt) * self.scale + self.tgt_pos_emb(pos)
             x = self.tgt_emb_norm(x)
 
-            causal = torch.triu(torch.ones(tgt_len, tgt_len, device=device), diagonal=1).bool()
-            causal_mask = causal.unsqueeze(0).expand(batch_t * 4, -1, -1).reshape(batch_t, 4, tgt_len, tgt_len)[:, 0]
+            causal_mask = torch.triu(torch.ones(tgt_len, tgt_len, device=device), diagonal=1).bool()
 
             enc_key_mask = ~enc_mask
             for layer in self.decoder_layers:

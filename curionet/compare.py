@@ -43,6 +43,14 @@ class WarmupScheduler:
         return current_lr
 
 
+def _save_checkpoint(model, config, history, path):
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "config": config,
+        "history": history,
+    }, path)
+
+
 def _train_one(
     model: nn.Module,
     name: str,
@@ -53,6 +61,8 @@ def _train_one(
     device: str,
     patience: int,
     warmup_epochs: int,
+    checkpoint_dir: str = "checkpoints",
+    model_config: dict = None,
 ) -> dict:
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = WarmupScheduler(optimizer, lr=lr, warmup_epochs=warmup_epochs)
@@ -122,6 +132,9 @@ def _train_one(
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
+            if model_config is not None:
+                best_path = os.path.join(checkpoint_dir, f"{name}_best.pt")
+                _save_checkpoint(model, model_config, history, best_path)
             print(f"    -> New best val (loss: {best_val_loss:.4f}, PPL: {val_ppl:.2f})")
         else:
             patience_counter += 1
@@ -130,6 +143,12 @@ def _train_one(
         if patience_counter >= patience:
             print(f"    -> Early stopping at epoch {epoch}")
             break
+
+    # Always save final weights (even if early stopped or crashed later)
+    if model_config is not None:
+        final_path = os.path.join(checkpoint_dir, f"{name}_latest.pt")
+        _save_checkpoint(model, model_config, history, final_path)
+        print(f"    -> Saved final weights to {final_path}")
 
     return history
 
@@ -167,6 +186,7 @@ def compare(
     patience: int = 4,
     warmup_epochs: int = 5,
     plot_dir: str = "plots",
+    checkpoint_dir: str = "checkpoints",
 ) -> dict:
     """Benchmark CurioNet vs Transformer on WikiText-2.
 
@@ -183,6 +203,7 @@ def compare(
     print(f"Device: {device}\n")
 
     os.makedirs(plot_dir, exist_ok=True)
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
     # Load WikiText-2
     print("Loading WikiText-2...")
@@ -202,6 +223,11 @@ def compare(
 
     # --- CurioNet (~300K params) ---
     # dim=46, num_layers=2 → ~301K params
+    curionet_config = {
+        "type": "curionet", "dim": 46, "num_layers": 2,
+        "src_vocab_size": VOCAB_SIZE, "tgt_vocab_size": VOCAB_SIZE,
+        "dropout": 0.1, "padding_idx": PAD_IDX,
+    }
     curionet = CurioNet(
         src_vocab_size=VOCAB_SIZE,
         tgt_vocab_size=VOCAB_SIZE,
@@ -215,6 +241,11 @@ def compare(
 
     # --- Transformer (~300K params) ---
     # dim=64, num_layers=2, num_heads=4 → ~309K params
+    transformer_config = {
+        "type": "transformer", "dim": 64, "num_layers": 2, "num_heads": 4,
+        "src_vocab_size": VOCAB_SIZE, "tgt_vocab_size": VOCAB_SIZE,
+        "dropout": 0.1, "padding_idx": PAD_IDX,
+    }
     transformer = TransformerSeq2Seq(
         src_vocab_size=VOCAB_SIZE,
         tgt_vocab_size=VOCAB_SIZE,
@@ -240,8 +271,9 @@ def compare(
     print("Training CurioNet (curiosity-based)")
     print("=" * 70)
     curionet_history = _train_one(
-        curionet, "CurioNet", train_loader, val_loader,
+        curionet, "curionet", train_loader, val_loader,
         epochs, lr, device, patience, warmup_epochs,
+        checkpoint_dir=checkpoint_dir, model_config=curionet_config,
     )
 
     # --- Train Transformer ---
@@ -249,8 +281,9 @@ def compare(
     print("Training Transformer (attention-based)")
     print("=" * 70)
     transformer_history = _train_one(
-        transformer, "Transformer", train_loader, val_loader,
+        transformer, "transformer", train_loader, val_loader,
         epochs, lr, device, patience, warmup_epochs,
+        checkpoint_dir=checkpoint_dir, model_config=transformer_config,
     )
 
     # --- Test evaluation ---
